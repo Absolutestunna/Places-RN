@@ -7,7 +7,7 @@ import PlaceList from '../../components/Listing/placesListing';
 
 const mapStateToProps = state => {
   return {
-    placesList: state.places.placesList
+    placesList: state.places.placesList,
   }
 }
 
@@ -112,7 +112,7 @@ class FindPlaceScreen extends Component {
             opacity: fadeAnim
           }}>
           <PlaceList
-            placesList={ placesList}
+            placesList={ placesList }
             onPlaceSelected={this.placeSelectedHandler}
           />
         </Animated.View>

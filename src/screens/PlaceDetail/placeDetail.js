@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { View, Image, Text, Button, StyleSheet, Dimensions, TouchableOpacity, Platform } from 'react-native';
 import { connect } from "react-redux";
 import Icon from 'react-native-vector-icons/Ionicons';
-
+import MapView from 'react-native-maps'
 
 import { deletePlace } from '../../redux/actions/index';
 
@@ -44,8 +44,13 @@ class PlaceModal extends Component {
     this.props.navigator.pop();
   }
   render(){
-    const { selectedPlace } = this.props;
-    console.log('this.state.viewMode in place detail', this.state.viewMode);
+    const { selectedPlace: { location: { latitude, longitude }, name, img } } = this.props;
+    let focusedLocation = {
+      latitude: latitude,
+      longitude: longitude,
+      latitudeDelta: 0.0122,
+      longitudeDelta: Dimensions.get('window').width / Dimensions.get('window').height * 0.0122
+    }
     return (
         <View
           style={[
@@ -54,14 +59,28 @@ class PlaceModal extends Component {
             : styles.landscapeDetailStyleContainer
           ]}>
 
-          <View style={styles.subContainer}>
-            <Image source={ selectedPlace.img } style={styles.imageStyling}/>
+          <View style={styles.subContainerStyling}>
+            <View style={styles.subContainer}>
+                <Image source={ img } style={styles.imageStyling}/>
+            </View>
+
+            <View style={styles.subContainer}>
+                <MapView
+                  initialRegion={focusedLocation}
+                  style={styles.map}>
+                  <MapView.Marker
+                      coordinate={focusedLocation}
+                    />
+                </MapView>
+            </View>
+
           </View>
+
 
           <View style={styles.subContainer}>
             <View>
               <Text style={styles.placeName}>
-                {selectedPlace.name}
+                {name}
               </Text>
             </View>
 
@@ -86,9 +105,12 @@ const styles = StyleSheet.create({
   subContainer: {
     flex: 1
   },
+  subContainerStyling: {
+    flex: 3,
+  },
   imageStyling: {
     width: "100%",
-    height: 200
+    height: "100%",
   },
   portraitDetailStyleContainer: {
     flexDirection: "column",
@@ -110,6 +132,10 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     alignItems: "center"
+  },
+  map: {
+    ...StyleSheet.absoluteFillObject,
+
   },
 })
 

@@ -15,6 +15,7 @@ const reducer = (state = initialState, action) => {
         placesList: state.placesList.concat({
           key: Math.random(),
           name: action.place,
+          location: action.location,
           img: { uri: 'https://static.pexels.com/photos/2438/nature-forest-waves-trees.jpg'}
         })
       }
