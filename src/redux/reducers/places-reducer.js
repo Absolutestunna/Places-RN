@@ -1,13 +1,6 @@
 import { ADD_PLACE, DELETE_PLACE } from '../actions/actionTypes'
 
-const initialState = {
-  placesList: [
-    { key: Math.random(), name: "Ojuelegba", img: { uri: 'https://static.pexels.com/photos/2438/nature-forest-waves-trees.jpg'}},
-    { key: Math.random(), name: "Otukpa", img: { uri: 'https://static.pexels.com/photos/2438/nature-forest-waves-trees.jpg'}}
-  ]
-}
-
-const reducer = (state = initialState, action) => {
+const reducer = (state = { placesList: [] }, action) => {
   switch (action.type) {
     case ADD_PLACE:
       return {
@@ -16,7 +9,7 @@ const reducer = (state = initialState, action) => {
           key: Math.random(),
           name: action.place,
           location: action.location,
-          img: { uri: 'https://static.pexels.com/photos/2438/nature-forest-waves-trees.jpg'}
+          img: { uri: action.image.uri }
         })
       }
     case DELETE_PLACE:

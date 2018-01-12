@@ -17,7 +17,7 @@ import validate from '../../utility/validation';
 
 const mapDispatchToProps = dispatch => {
   return {
-    onAddPlace: (placeName, location) => dispatch(addPlace(placeName, location))
+    onAddPlace: (placeName, location, image) => dispatch(addPlace(placeName, location, image))
   }
 }
 
@@ -42,6 +42,10 @@ class SharePlaceScreen extends Component {
         }
       },
       location: {
+        value: null,
+        valid: false
+      },
+      image: {
         value: null,
         valid: false
       }
@@ -76,8 +80,8 @@ class SharePlaceScreen extends Component {
   }
 
   placeAddHandler = () => {
-    const { placeName, location } = this.state.controls
-    this.props.onAddPlace(placeName.value, location.value)
+    const { placeName, location, image } = this.state.controls;
+    this.props.onAddPlace(placeName.value, location.value, image.value)
     this.setState(prevState => {
       return {
         controls: {
@@ -103,6 +107,21 @@ class SharePlaceScreen extends Component {
       }
     })
   }
+
+  imagePickedHandler = image => {
+    this.setState(prevState => {
+      return {
+        controls: {
+          ...prevState.controls,
+          image: {
+            value: image,
+            valid: true
+          }
+        }
+      }
+    })
+  }
+
   render(){
     return (
       <ScrollView>
@@ -110,7 +129,7 @@ class SharePlaceScreen extends Component {
           <MainText>
             <HeadingText>Share a place with us!</HeadingText>
           </MainText>
-          <PickImage />
+          <PickImage onImagePicked={this.imagePickedHandler}/>
           <LocateMap
             onLocatedPick={this.locationPickedHandler}
             />
@@ -123,7 +142,7 @@ class SharePlaceScreen extends Component {
             <Button
               title="Share the place!"
               onPress={this.placeAddHandler}
-              disabled={!this.state.controls.placeName.valid || !this.state.controls.location.valid}
+              disabled={!this.state.controls.placeName.valid || !this.state.controls.location.valid || !this.state.controls.image.valid }
             />
           </View>
         </View>
