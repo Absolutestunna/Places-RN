@@ -31,7 +31,6 @@ const minLengthValidator = (val, minLength) => {
 }
 
 const notEmptyValidator = val => {
-  console.log('val', val);
   return val.trim() !== "";
 }
 

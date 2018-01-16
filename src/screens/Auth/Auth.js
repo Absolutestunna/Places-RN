@@ -230,7 +230,6 @@ class AuthScreen extends Component {
             color="#29aa42"
             onPress={this.loginHandler}
             disabled={!email.valid || !password.valid || (!confirmPassword.valid && authMode === "signup")}
-            disabled={false}
             >Submit
           </ButtonWithBackground>
         </KeyboardAvoidingView>

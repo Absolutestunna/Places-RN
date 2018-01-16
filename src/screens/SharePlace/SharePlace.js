@@ -1,5 +1,14 @@
 import React, { Component } from 'react';
-import { ScrollView, View, Text, Button, TextInput, Image, StyleSheet, KeyboardAvoidingView } from 'react-native';
+import { ScrollView,
+  View,
+  Text,
+  Button,
+  TextInput,
+  Image,
+  StyleSheet,
+  KeyboardAvoidingView,
+  ActivityIndicator
+ } from 'react-native';
 import { connect } from 'react-redux';
 
 
@@ -18,6 +27,12 @@ import validate from '../../utility/validation';
 const mapDispatchToProps = dispatch => {
   return {
     onAddPlace: (placeName, location, image) => dispatch(addPlace(placeName, location, image))
+  }
+}
+
+const mapStateToProps = state => {
+  return {
+    isLoading: state.ui.isLoading
   }
 }
 
@@ -81,17 +96,7 @@ class SharePlaceScreen extends Component {
 
   placeAddHandler = () => {
     const { placeName, location, image } = this.state.controls;
-    this.props.onAddPlace(placeName.value, location.value, image.value)
-    this.setState(prevState => {
-      return {
-        controls: {
-          ...prevState.controls,
-          placeName: {
-            value: ""
-          }
-        }
-      }
-    })
+    this.props.onAddPlace(placeName.value, location.value, image.value);
   }
 
   locationPickedHandler = location => {
@@ -122,7 +127,25 @@ class SharePlaceScreen extends Component {
     })
   }
 
+
   render(){
+
+    let submitButton = (
+      <Button
+        title="Share the place!"
+        onPress={this.placeAddHandler}
+        disabled={!this.state.controls.placeName.valid ||
+          !this.state.controls.location.valid ||
+          !this.state.controls.image.valid
+        }
+      />
+    );
+
+    if(this.props.isLoading){
+      submitButton = (
+        <ActivityIndicator />
+      )
+    }
     return (
       <ScrollView>
         <View style={style.container}>
@@ -139,11 +162,7 @@ class SharePlaceScreen extends Component {
             onChangeText={this.placeNameHandler}
           />
           <View style={style.imageButton}>
-            <Button
-              title="Share the place!"
-              onPress={this.placeAddHandler}
-              disabled={!this.state.controls.placeName.valid || !this.state.controls.location.valid || !this.state.controls.image.valid }
-            />
+            {submitButton}
           </View>
         </View>
       </ScrollView>
@@ -158,4 +177,4 @@ const style = StyleSheet.create({
   }
 })
 
-export default connect(null, mapDispatchToProps)(SharePlaceScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(SharePlaceScreen);

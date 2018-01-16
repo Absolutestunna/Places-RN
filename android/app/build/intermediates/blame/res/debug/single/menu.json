@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "/Users/Home/Personal_Projects/places-RN/android/app/build/intermediates/res/merged/debug/menu/stub.xml",
+        "source": "/Users/Home/Personal_Projects/places-RN/android/app/build/intermediates/exploded-aar/placesRN/react-native-navigation/unspecified/res/menu/stub.xml"
+    },
+    {
+        "merged": "/Users/Home/Personal_Projects/places-RN/android/app/build/intermediates/res/merged/debug/menu/search_item.xml",
+        "source": "/Users/Home/Personal_Projects/places-RN/android/app/build/intermediates/exploded-aar/placesRN/react-native-navigation/unspecified/res/menu/search_item.xml"
+    }
+]

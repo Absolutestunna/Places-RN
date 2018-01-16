@@ -36,6 +36,7 @@ class PlaceModal extends Component {
   }
 
   onDeletePlaceHandler = () => {
+    console.log('key for delete', this.props.selectedPlace.key);
     this.props.onDeletePlace(this.props.selectedPlace.key);
     this.props.navigator.pop();
   }
@@ -44,7 +45,7 @@ class PlaceModal extends Component {
     this.props.navigator.pop();
   }
   render(){
-    const { selectedPlace: { location: { latitude, longitude }, name, img } } = this.props;
+    const { selectedPlace: { location: { latitude, longitude }, place, image } } = this.props;
     let focusedLocation = {
       latitude: latitude,
       longitude: longitude,
@@ -61,7 +62,7 @@ class PlaceModal extends Component {
 
           <View style={styles.subContainerStyling}>
             <View style={styles.subContainer}>
-                <Image source={ img } style={styles.imageStyling}/>
+                <Image source={ image } style={styles.imageStyling}/>
             </View>
 
             <View style={styles.subContainer}>
@@ -80,7 +81,7 @@ class PlaceModal extends Component {
           <View style={styles.subContainer}>
             <View>
               <Text style={styles.placeName}>
-                {name}
+                {place}
               </Text>
             </View>
 

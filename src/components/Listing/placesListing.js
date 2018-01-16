@@ -12,9 +12,9 @@ const listItems = ( { placesList, onPlaceSelected } ) => {
           data={placesList}
           renderItem={(info) => (
             <ListItem
-              place={info.item.name}
+              place={info.item.place}
               onItemPressed={() => onPlaceSelected(info.item.key)}
-              placeImage={info.item.img}
+              placeImage={info.item.image}
               />
           )}
         />) : <View style={styles.emptyListStyling}>

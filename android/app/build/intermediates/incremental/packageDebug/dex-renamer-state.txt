@@ -1,0 +1,4 @@
+#Fri Jan 12 00:22:01 EST 2018
+base.0=/Users/Home/Personal_Projects/places-RN/android/app/build/intermediates/transforms/dex/debug/folders/1000/1f/main
+renamed.0=classes.dex
+file.0=/Users/Home/Personal_Projects/places-RN/android/app/build/intermediates/transforms/dex/debug/folders/1000/1f/main/classes.dex
