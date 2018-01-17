@@ -110,7 +110,18 @@ export const authGetToken = () => {
         resolve(token)
       }
     })
+    promise.catch(err => {                              //clear asycstorage if no token OR expired token
+      dispatch(authClearStorage())
+    })
     return promise;
+  }
+}
+
+const authClearStorage = () => {
+  return dispatch => {
+    AsyncStorage.removeItem("ap:auth:token");
+    AsyncStorage.removeItem("ap:auth:expiryDate")
+
   }
 }
 
