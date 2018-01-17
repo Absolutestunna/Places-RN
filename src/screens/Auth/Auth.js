@@ -10,12 +10,11 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Keyboard,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
+  ActivityIndicator
   } from 'react-native';
 import { connect } from 'react-redux'
 
-
-import startMainTabs from '../MainTabs/startMainTabs';
 
 //UI components
 import DefaultInput from '../../components/UI/DefaultInput/DefaultInput';
@@ -27,15 +26,20 @@ import ButtonWithBackground from '../../components/UI/ButtonWithBackground/Butto
 import validate from '../../utility/validation';
 
 //redux actions
-import { tryAuth } from '../../redux/actions/index';
+import { tryAuth, authAutoSignIn } from '../../redux/actions/index';
 
 //local assets
 import localImage from '../../assets/mountain.jpg'
 
-
+const mapStateToProps = state => {
+  return {
+    isLoading: state.ui.isLoading
+  }
+}
 const mapDispatchToProps = dispatch => {
   return {
-    onLogin: (authData) => dispatch(tryAuth(authData))
+    onTryAuth: (authData, authMode) => dispatch(tryAuth(authData, authMode)),
+    onAutoSignIn: () => dispatch(authAutoSignIn())
   }
 }
 
@@ -83,19 +87,23 @@ class AuthScreen extends Component {
     })
   }
 
+  componentDidMount(){
+    this.props.onAutoSignIn()
+  }
+
   componentWillUnmount(){
     //prevent memory leak
     Dimensions.removeEventListener("change", this.updateStylesFunc)
   }
 
-  loginHandler = () => {
-    const { email, password } = this.state.controls;
+  authHandler = () => {
+    const { authMode, controls: { email, password } } = this.state;
+    console.log('email', email);
     const authData = {
       email: email.value,
       password: password.value
     }
-    this.props.onLogin(authData)
-    startMainTabs();
+    this.props.onTryAuth(authData, authMode)
   }
 
   handleAuthMode = () => {
@@ -108,6 +116,8 @@ class AuthScreen extends Component {
 
   updateInputState = (key, value) => {
     let connectedValues = {};
+
+    //test for confirm password
     if (this.state.controls[key].validationRules.equalTo){
       const equalControl = this.state.controls[key].validationRules.equalTo;
       const equalValue = this.state.controls[equalControl].value;
@@ -154,6 +164,16 @@ class AuthScreen extends Component {
     let headingText = null;
     let { controls: { email, password, confirmPassword }, authMode } = this.state;
 
+    let buttonState = (
+      <ButtonWithBackground
+        color="#29aa42"
+        onPress={this.authHandler}
+        disabled={!email.valid || !password.valid || (!confirmPassword.valid && authMode === "signup")}
+        disabled={false}
+        >Submit
+      </ButtonWithBackground>
+    )
+
     if (this.state.viewMode === "portrait"){
       headingText = (
         <MainText>
@@ -161,6 +181,12 @@ class AuthScreen extends Component {
             Please {authMode === "login" ? "Login" : "Sign Up"}
           </HeadingText>
         </MainText>
+      )
+    }
+
+    if(this.props.isLoading){
+      buttonState = (
+        <ActivityIndicator />
       )
     }
     return (
@@ -226,12 +252,7 @@ class AuthScreen extends Component {
           </View>
         </TouchableWithoutFeedback>
 
-          <ButtonWithBackground
-            color="#29aa42"
-            onPress={this.loginHandler}
-            disabled={!email.valid || !password.valid || (!confirmPassword.valid && authMode === "signup")}
-            >Submit
-          </ButtonWithBackground>
+          {buttonState}
         </KeyboardAvoidingView>
       </ImageBackground>
     )
@@ -271,4 +292,4 @@ const style = StyleSheet.create({
   }
 })
 
-export default connect(null, mapDispatchToProps)(AuthScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(AuthScreen);

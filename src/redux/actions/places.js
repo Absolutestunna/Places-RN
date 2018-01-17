@@ -1,21 +1,35 @@
-import { ADD_PLACE, DELETE_PLACE, SET_PLACES } from '../actions/actionTypes';
-import { uiStartLoading, uiStopLoading } from './index';
+import { DELETE_PLACE, SET_PLACES } from '../actions/actionTypes';
+import { uiStartLoading, uiStopLoading, authGetToken } from './index';
 
 export const addPlace = (placeName, location, image) => {
 
   return dispatch => {
+    let authToken;
     dispatch(uiStartLoading());
-    fetch("https://us-central1-places-rn-1515696518254.cloudfunctions.net/storeImage", {
-      method: "POST",
-      body: JSON.stringify({
-        image: image.base64
+    dispatch(authGetToken())
+      .catch(function(){
+        alert("No valid token found")
       })
-    })
+      .then(function(token){
+        authToken = token;
+        console.log('authTOken', authToken);
+        return fetch(
+          "https://us-central1-places-rn-1515696518254.cloudfunctions.net/storeImage",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              image: image.base64
+            }),
+            headers: {
+              "Authorization": "Bearer " + authToken
+            }
+          }
+        );
+      })
     .catch(function(err) {
       console.log('image error', err);
       alert("Something went wrong, please try again!");
       dispatch(uiStopLoading());
-
     })
     .then(function(res) {
       console.log('raw json', res);
@@ -27,46 +41,57 @@ export const addPlace = (placeName, location, image) => {
         location: location,
         image: data.imageUrl
       };
-      return fetch("https://places-rn-1515696518254.firebaseio.com/places.json", {
+      return fetch("https://places-rn-1515696518254.firebaseio.com/places.json?auth=" + authToken, {
         method: "POST",
         body: JSON.stringify(placeData)
       })
-    })
-    .catch(function(err) {
-      dispatch(uiStopLoading());
-
     })
     .then(function(res){
       return res.json()
     })
     .then(function(parsedData){
+      console.log("parsedData", parsedData);
       dispatch(uiStopLoading());
-
+    })
+    .catch(function(err) {
+      console.log('err', err);
+      alert("Something went wrong, please try again!");
+      dispatch(uiStopLoading());
     })
   }
 }
 
 export const getPlaces = () => {
     return dispatch => {
-        fetch("https://places-rn-1515696518254.firebaseio.com/places.json")
-        .catch(function(err) {
-            alert("Something went wrong, sorry :/");
-            console.log(err);
-        })
-        .then(function(res) {return res.json()})
-        .then(function(parsedRes) {
-            const places = [];
-            for (let key in parsedRes) {
-                places.push({
-                    ...parsedRes[key],
-                    image: {
-                        uri: parsedRes[key].image
-                    },
-                    key: key
-                });
-            }
-            dispatch(setPlaces(places));
-        });
+        dispatch(authGetToken())
+          .then(function(token) {
+            return fetch("https://places-rn-1515696518254.firebaseio.com/places.json?auth=" + token)
+          })
+          .catch(function() {
+            alert("No valid token found")
+          })
+          .then(function(res) {return res.json()})
+          .then(function(parsedRes) {
+              const places = [];
+              for (let key in parsedRes) {
+                  places.push({
+                      ...parsedRes[key],
+                      image: {
+                          uri: parsedRes[key].image
+                      },
+                      key: key
+                  });
+              }
+              dispatch(setPlaces(places));
+          })
+          .catch(function(err) {
+              alert("Something went wrong, sorry :/");
+              console.log(err);
+          })
+
+
+
+
     };
 };
 
@@ -78,19 +103,27 @@ export const setPlaces = places => {
 };
 
 export const deletePlace = key => {
-  return dispatch => {
-    fetch(`https://places-rn-1515696518254.firebaseio.com/places/${key}.json`, {
-      method: 'DELETE'
-    })
-    .catch(function(err) {
-        alert("Something went wrong. Couldn't delete sorry :/");
-        console.log(err);
-    })
-    .then(function(res) {
-      console.log('res', res);
-      dispatch(deleteComplete(key))
-    })
 
+  return dispatch => {
+    dispatch(authGetToken())
+      .catch(function(err) {
+          alert("No valid token");    //catch token errors
+          console.log(err);
+      })
+      .then(function(token){
+        dispatch(deleteComplete(key)) //remove key in local state
+            return fetch(`https://places-rn-1515696518254.firebaseio.com/places/${key}.json?auth=${token}`, {
+                method: 'DELETE'
+              })
+          })
+          .then(function(parsedRes){
+            console.log('parsedRes', parsedRes);
+            console.log('Done!');
+          })
+          .catch(function(err) {
+              alert("Something went wrong. Couldn't delete sorry :/");
+              console.log(err);
+          })
   }
 }
 
