@@ -18,7 +18,6 @@ export const addPlace = (placeName, location, image) => {
       })
       .then(function(token){
         authToken = token;
-        console.log('authTOken', authToken);
         return fetch(
           "https://us-central1-places-rn-1515696518254.cloudfunctions.net/storeImage",
           {
@@ -33,13 +32,15 @@ export const addPlace = (placeName, location, image) => {
         );
       })
     .catch(function(err) {
-      console.log('image error', err);
       alert("Something went wrong, please try again!");
       dispatch(uiStopLoading());
     })
-    .then(function(res) {
-      console.log('raw json', res);
-      return res.json()
+    .then((res) => {
+      if(res.ok){
+        return res.json()
+      } else {
+        throw(new Error())
+      }
     })
     .then(data => {
       const placeData = {
@@ -52,8 +53,12 @@ export const addPlace = (placeName, location, image) => {
         body: JSON.stringify(placeData)
       })
     })
-    .then(function(res){
-      return res.json()
+    .then((res) => {
+      if(res.ok){
+        return res.json()
+      } else {
+        throw(new Error())
+      }
     })
     .then(function(parsedData){
       console.log("parsedData", parsedData);
@@ -74,17 +79,32 @@ export const placeAdded = () => {
   }
 }
 
+let validateResponse = (res) => {
+  console.log('res', res);
+  if(res.ok){
+    return res.json()
+  } else {
+    throw(new Error())
+  }
+}
+
 export const getPlaces = () => {
     return dispatch => {
         dispatch(authGetToken())
           .then(function(token) {
             return fetch("https://places-rn-1515696518254.firebaseio.com/places.json?auth=" + token)
           })
-          .catch(function() {
+          .catch(() => {
             alert("No valid token found")
           })
-          .then(function(res) {return res.json()})
-          .then(function(parsedRes) {
+          .then((res) => {
+            if(res.ok){
+              return res.json()
+            } else {
+              throw(new Error())
+            }
+          })
+          .then((parsedRes) => {
               const places = [];
               for (let key in parsedRes) {
                   places.push({
@@ -101,10 +121,6 @@ export const getPlaces = () => {
               alert("Something went wrong, sorry :/");
               console.log(err);
           })
-
-
-
-
     };
 };
 
