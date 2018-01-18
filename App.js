@@ -22,9 +22,15 @@ Navigation.registerComponent("awesome-places.SideDrawerScreen", () => SideDrawer
 
 
 //start the default app
-Navigation.startSingleScreenApp({
-  screen: {
-    screen: "awesome-places.AuthScreen",
-    title: "Login"
-  }
-})
+const startApp = () => {
+    Navigation.startSingleScreenApp({
+    screen: {
+      screen: "awesome-places.AuthScreen",
+      title: "Login"
+    }
+  })
+}
+
+
+startApp();
+export default startApp;

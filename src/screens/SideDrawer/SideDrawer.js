@@ -1,12 +1,19 @@
 import React, { Component } from 'react';
 import { View, Dimensions, TouchableOpacity, Platform, StyleSheet } from 'react-native';
+import { connect } from 'react-redux';
 import DrawerItem from '../../components/UI/DrawerItems/DrawerItems';
+import { authLogout } from '../../redux/actions/index';
+
+const mapDispatchToProps = dispatch => {
+  return {
+    onLogout: () => dispatch(authLogout())
+  }
+}
 
 class SideDrawer extends Component {
   signOutHandler = () => {
-    this.props.navigator.push({
-      screen: 'awesome-places.AuthScreen'
-    });
+    console.log('this.props', this.props);
+    this.props.onLogout();
   }
   render(){
     let platformDrawerLogo = Platform.OS === "android" ? "md-log-out" : "ios-log-out";
@@ -28,4 +35,4 @@ const styles = StyleSheet.create({
   }
 })
 
-export default SideDrawer;
+export default connect(null, mapDispatchToProps)(SideDrawer);

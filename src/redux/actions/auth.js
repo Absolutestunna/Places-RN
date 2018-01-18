@@ -1,7 +1,8 @@
-import { TRY_AUTH, AUTH_SET_TOKEN } from './actionTypes';
+import { TRY_AUTH, AUTH_SET_TOKEN, AUTH_REMOVE_TOKEN } from './actionTypes';
 import { uiStopLoading, uiStartLoading } from './index';
 import startMainTabs from '../../screens/MainTabs/startMainTabs';
 import { AsyncStorage } from "react-native";
+import App from '../../../App';
 
 const errorCodes = {
   "EMAIL_EXISTS": "The email address is already in use by another account.",
@@ -160,6 +161,8 @@ const authClearStorage = () => {
   return dispatch => {
     AsyncStorage.removeItem("ap:auth:token");
     AsyncStorage.removeItem("ap:auth:expiryDate");
+    return AsyncStorage.removeItem("ap:auth:refreshToken");
+
 
   }
 }
@@ -171,6 +174,21 @@ export const authAutoSignIn = () => {
         startMainTabs()
       })
       .catch(function(err){console.log('Failed to fetch token')})
+  }
+}
 
+export const authLogout = () => {
+  return dispatch => {
+    dispatch(authClearStorage())
+      .then(function(){
+        App();
+      })
+    dispatch(authRemoveToken());
+  }
+}
+
+export const authRemoveToken = () => {
+  return {
+    type: AUTH_REMOVE_TOKEN
   }
 }
