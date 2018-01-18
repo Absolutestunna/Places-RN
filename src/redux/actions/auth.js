@@ -13,14 +13,16 @@ const errorCodes = {
   "USER_DISABLED": "The user account has been disabled by an administrator."
 }
 
+
+const API_KEY = "AIzaSyBLZ6leE9BQ4bljpCjZKdJ8Zg-csVHXyZs";
+
 export const tryAuth = (authData, authMode) => {
   console.log('authMode', authMode);
   return dispatch => {
     dispatch(uiStartLoading());
-    const apiKey = "AIzaSyBLZ6leE9BQ4bljpCjZKdJ8Zg-csVHXyZs";
-    let url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=" + apiKey;
+    let url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=" + API_KEY;
     if (authMode === "signup"){
-        url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=" + apiKey;
+        url = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=" + API_KEY;
     }
 
     fetch(url, {
@@ -47,7 +49,10 @@ export const tryAuth = (authData, authMode) => {
           dispatch(uiStopLoading())
 
         } else {
-          dispatch(authStoreToken(parsedRes.idToken, parsedRes.expiresIn))
+          dispatch(authStoreToken(parsedRes.idToken,
+            parsedRes.expiresIn,
+            parsedRes.refreshToken
+          ))
           startMainTabs();
         }
       })
@@ -55,13 +60,14 @@ export const tryAuth = (authData, authMode) => {
   }
 }
 
-export const authStoreToken = (token, expiresIn) => {
+export const authStoreToken = (token, expiresIn, refreshToken) => {
   return dispatch => {
     dispatch(authSetToken(token));
     const now = new Date();
     const expiryDate = now.getTime() + (expiresIn * 1000);     //milliseconds
     AsyncStorage.setItem("ap:auth:token", token)
     AsyncStorage.setItem("ap:auth:expiryDate", expiryDate.toString())     //expiration time for token
+    AsyncStorage.setItem("ap:auth:refreshToken", refreshToken)
 
   }
 }
@@ -110,17 +116,50 @@ export const authGetToken = () => {
         resolve(token)
       }
     })
-    promise.catch(err => {                              //clear asycstorage if no token OR expired token
-      dispatch(authClearStorage())
+    return promise
+    .catch(err => {                          //clear asycstorage if no token OR expired token
+      return AsyncStorage.getItem("ap:auth:refreshToken")
+        .then(function(refreshToken){
+          return fetch("https://securetoken.googleapis.com/v1/token?key=" + API_KEY, {
+            method: 'POST',
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: "grant_type=refresh_token&refresh_token=" + refreshToken
+          })
+        })
+        .then(function(res){
+          console.log('refreshtoken', res);
+          return res.json()
+        })
+        .then(function(parsedRes){
+          if(parsedRes.id_token){
+            console.log('Refresh Token worked');
+            dispatch(authStoreToken(
+              parsedRes.id_token,
+              parsedRes.expires_in,
+              parsedRes.refresh_token)
+            )
+            return parsedRes.id_token
+          } else {
+            dispatch(authClearStorage())
+          }
+        })
     })
-    return promise;
+    .then(function(token){
+       if(!token){
+         throw(new Error());
+       } else {
+         return token
+       }
+    })
   }
 }
 
 const authClearStorage = () => {
   return dispatch => {
     AsyncStorage.removeItem("ap:auth:token");
-    AsyncStorage.removeItem("ap:auth:expiryDate")
+    AsyncStorage.removeItem("ap:auth:expiryDate");
 
   }
 }
