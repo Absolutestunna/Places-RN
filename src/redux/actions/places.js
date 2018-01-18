@@ -43,10 +43,12 @@ export const addPlace = (placeName, location, image) => {
       }
     })
     .then(data => {
+      console.log('data with image path', data);
       const placeData = {
         place: placeName,
         location: location,
-        image: data.imageUrl
+        image: data.imageUrl,
+        path: data.imagePath
       };
       return fetch("https://places-rn-1515696518254.firebaseio.com/places.json?auth=" + authToken, {
         method: "POST",
