@@ -46,25 +46,32 @@ class SharePlaceScreen extends Component {
     super(props);
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent);
   }
-  state = {
-    controls: {
-      placeName: {
-        value: "",
-        valid: false,
-        touched: false,
-        validationRules: {
-          notEmpty: true
+
+  componentWillMount(){
+    this.reset();
+  }
+
+  reset = () => {
+    this.setState({
+      controls: {
+        placeName: {
+          value: "",
+          valid: false,
+          touched: false,
+          validationRules: {
+            notEmpty: true
+          }
+        },
+        location: {
+          value: null,
+          valid: false
+        },
+        image: {
+          value: null,
+          valid: false
         }
-      },
-      location: {
-        value: null,
-        valid: false
-      },
-      image: {
-        value: null,
-        valid: false
       }
-    }
+    })
   }
 
 
@@ -97,6 +104,9 @@ class SharePlaceScreen extends Component {
   placeAddHandler = () => {
     const { placeName, location, image } = this.state.controls;
     this.props.onAddPlace(placeName.value, location.value, image.value);
+    this.reset();
+    this.imagePicker.reset();
+    this.locationPicker.reset();
   }
 
   locationPickedHandler = location => {
@@ -152,9 +162,10 @@ class SharePlaceScreen extends Component {
           <MainText>
             <HeadingText>Share a place with us!</HeadingText>
           </MainText>
-          <PickImage onImagePicked={this.imagePickedHandler}/>
+          <PickImage onImagePicked={this.imagePickedHandler} ref={ref => this.imagePicker = ref}/>
           <LocateMap
             onLocatedPick={this.locationPickedHandler}
+            ref={ref => this.locationPicker = ref}
             />
 
           <PlaceInput
