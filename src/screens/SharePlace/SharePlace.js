@@ -24,15 +24,21 @@ import LocateMap from '../../components/LocateMap/LocateMap';
 //utility functions
 import validate from '../../utility/validation';
 
+//actions
+import { resetPlaceAdd } from '../../redux/actions/index'
+
+
 const mapDispatchToProps = dispatch => {
   return {
-    onAddPlace: (placeName, location, image) => dispatch(addPlace(placeName, location, image))
+    onAddPlace: (placeName, location, image) => dispatch(addPlace(placeName, location, image)),
+    onResetPlaceAdd: () => dispatch(resetPlaceAdd())
   }
 }
 
 const mapStateToProps = state => {
   return {
-    isLoading: state.ui.isLoading
+    isLoading: state.ui.isLoading,
+    placeAdded: state.places.placeAdded
   }
 }
 
@@ -49,6 +55,13 @@ class SharePlaceScreen extends Component {
 
   componentWillMount(){
     this.reset();
+  }
+
+  componentDidUpdate(){
+    if(this.props.placeAdded){
+      this.props.navigator.switchToTab({tabIndex: 0});
+      // this.props.onResetPlaceAdd();
+    }
   }
 
   reset = () => {
@@ -76,6 +89,11 @@ class SharePlaceScreen extends Component {
 
 
   onNavigatorEvent = (event) => {
+    if (event.type === "ScreenChangedEvent"){
+      if(event.id === "willAppear"){
+        this.props.onResetPlaceAdd()
+      }
+    }
     if (event.type === "NavBarButtonPress"){
       if (event.id === "sideDrawerToggle"){
         this.props.navigator.toggleDrawer({
@@ -139,7 +157,6 @@ class SharePlaceScreen extends Component {
 
 
   render(){
-
     let submitButton = (
       <Button
         title="Share the place!"
